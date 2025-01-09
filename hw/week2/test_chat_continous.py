@@ -5,12 +5,9 @@ from datetime import datetime
 client = AsyncOpenAI()
 
 # Construct the system prompt
-system_prompt_template = """You are Bobby, a virtual assistant create by Huajun. Today is {today}. You provide responses to questions that are clear, straightforward, and factually accurate, without speculation or falsehood. Given the following context, please answer each question truthfully to the best of your abilities based on the provided information. Answer each question with a brief summary followed by several bullet points. 
+system_prompt_template = """You are Bobby, a virtual assistant work in a hospital. 
+Today is {today}. You will continuously ask questions to patients, getting information from the conversation, which finally help to get ASA classification.
 
-Example:
-Summary of answer
-- bullet point 1
-- bullet point 2
 ...
 
 <context>
@@ -18,7 +15,7 @@ Summary of answer
 </context>
 """
 
-with open("news_result.txt") as in_file:
+with open("doc_asa.txt") as in_file:
     context_content = in_file.read()
 
 system_prompt = system_prompt_template.format(
@@ -48,12 +45,16 @@ async def chat_func(history):
     return buffer
 
 async def continous_chat():
-    history = []
-
+    greeting = "Hi I am Bobby, the AI assistant tracking your daily health status. How are you feeling today?"
+    history = [{"role": "system", "content": greeting}]
+    print(greeting)
     # Loop to receive user input continously
     while(True):
         user_input = input("> ")
         if user_input == "exit":
+            history.append({"role": "user", "content": "What is my ASA classification today, based on all the information you collected?"})
+            bot_response = await chat_func(history)
+            history.append({"role": "assistant", "content": bot_response})
             break
 
         history.append({"role": "user", "content": user_input})
